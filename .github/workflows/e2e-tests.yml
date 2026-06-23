@@ -18,7 +18,6 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node_id: 'node'
         node-version: '20'
         cache: 'npm'
 
@@ -33,8 +32,8 @@ jobs:
 
     - name: Start Next.js Frontend Server
       env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://cppqgkzogzxywwabtmnz.supabase.co' }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwcHFna3pvZ3p4eXd3YWJ0bW56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjE1MjEsImV4cCI6MjA5NjY5NzUyMX0.ac00bdM_oFw2M8BSuiN7rV0sAZOa0Cz9GDgV6nbxrns' }}
       run: |
         npm run build
         npm run start &
