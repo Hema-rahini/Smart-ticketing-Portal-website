@@ -30,29 +30,32 @@ jobs:
     - name: Install Frontend Dependencies
       run: npm install
 
-    - name: Start Next.js Frontend Server
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://cppqgkzogzxywwabtmnz.supabase.co' }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwcHFna3pvZ3p4eXd3YWJ0bW56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjE1MjEsImV4cCI6MjA5NjY5NzUyMX0.ac00bdM_oFw2M8BSuiN7rV0sAZOa0Cz9GDgV6nbxrns' }}
-      run: |
-        npm run build
-        npm run start &
-      # Runs in background
-
     - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r tests/requirements.txt
 
-    - name: Run E2E Selenium Tests
+    - name: Start Next.js Server and Run E2E Tests
       continue-on-error: true
       env:
-        APP_URL: ${{ secrets.APP_URL || 'http://localhost:3000' }}
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        APP_URL: ${{ secrets.APP_URL }}
         HEADLESS: "true"
         SKIP_DB_TESTS: "true" # Skip DB verification in CI unless live DB secret is present
       run: |
+        # Use default values if secrets are not provided
+        export NEXT_PUBLIC_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-https://cppqgkzogzxywwabtmnz.supabase.co}"
+        export NEXT_PUBLIC_SUPABASE_ANON_KEY="${NEXT_PUBLIC_SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwcHFna3pvZ3p4eXd3YWJ0bW56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExMjE1MjEsImV4cCI6MjA5NjY5NzUyMX0.ac00bdM_oFw2M8BSuiN7rV0sAZOa0Cz9GDgV6nbxrns}"
+        export APP_URL="${APP_URL:-http://localhost:3000}"
+        
+        npm run build
+        npm run start &
+        
         # Wait for Frontend server to start responding
         sleep 5
+        
+        # Run tests
         pytest tests/ -v
 
     - name: Upload Test Report Artifact
